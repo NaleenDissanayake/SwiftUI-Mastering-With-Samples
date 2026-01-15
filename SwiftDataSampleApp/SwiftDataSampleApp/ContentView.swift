@@ -11,17 +11,54 @@ import SwiftData
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var wishList: [WishModel]
-    
+    @State private var isAlertShown: Bool = false
+    @State private var newWish: String = ""
     var body: some View {
         NavigationStack {
             List {
                 ForEach(wishList) { wish in
                     Text(wish.title)
                         .padding(10)
+                        .swipeActions(edge: .trailing) {
+                            Button("Delete", role: .destructive) {
+                                modelContext.delete(wish)
+                            }
+                        }
                 }
             }
             .listStyle(.grouped)
             .navigationTitle("Wish List")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        // add new wish item into the list
+                        isAlertShown.toggle()
+                    } label: {
+                        Image(systemName: "plus")
+                            .imageScale(.medium)
+                    }
+                }
+            }
+            .safeAreaInset(edge: .bottom) {
+                if !wishList.isEmpty {
+                    HStack {
+                        Spacer()
+                        Text("\(wishList.count) wish\(wishList.count > 1 ? "es" : "")")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                    }
+                    .padding(.vertical, 8)
+                    .background(.ultraThinMaterial)
+                }
+            }
+            .alert("Create a new wish", isPresented: $isAlertShown) {
+                TextField("Add a new wish", text: $newWish)
+                Button("Save") {
+                    modelContext.insert(WishModel(title: newWish))
+                    newWish = ""
+                }
+            }
             .overlay {
                 if wishList.isEmpty {
                     ContentUnavailableView {
