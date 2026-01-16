@@ -11,7 +11,7 @@ import SwiftUI
 struct SriLankaNatureApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainView()
         }
     }
 }
